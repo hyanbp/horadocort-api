@@ -31,6 +31,13 @@ public class AppConfig {
     }
 
     private void validateRelayOsConfig(RelayOsProperties properties) {
+        System.out.println("========== RELAYOS DEBUG ==========");
+        System.out.println("properties.baseUrl() = [" + properties.baseUrl() + "]");
+        System.out.println("System.getenv(RELAYOS_BASE_URL) = [" + System.getenv("RELAYOS_BASE_URL") + "]");
+        System.out.println("System.getenv(RELAYOS_API_KEY) is null? = " + (System.getenv("RELAYOS_API_KEY") == null));
+        System.out.println("System.getenv(SPRING_PROFILES_ACTIVE) = [" + System.getenv("SPRING_PROFILES_ACTIVE") + "]");
+        System.out.println("===================================");
+
         if (properties.baseUrl() == null || !properties.baseUrl().startsWith("https://")) {
             throw new IllegalStateException(
                     "RELAYOS_BASE_URL inválida ou não configurada: " + properties.baseUrl());
