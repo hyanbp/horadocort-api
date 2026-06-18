@@ -22,10 +22,24 @@ public class AppConfig {
 
     @Bean
     public WebClient relayOsWebClient(RelayOsProperties properties) {
-        WebClient.Builder builder = WebClient.builder().baseUrl(properties.baseUrl());
-        if (properties.apiKey() != null && !properties.apiKey().isBlank()) {
-            builder.defaultHeader("Authorization", "Bearer " + properties.apiKey());
+        validateRelayOsConfig(properties);
+        return WebClient.builder()
+                .baseUrl(properties.baseUrl())
+                .defaultHeader("Authorization", "Bearer " + properties.apiKey())
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
+
+    private void validateRelayOsConfig(RelayOsProperties properties) {
+        if (properties.baseUrl() == null || !properties.baseUrl().startsWith("https://")) {
+            throw new IllegalStateException(
+                    "RELAYOS_BASE_URL inválida ou não configurada: " + properties.baseUrl());
         }
-        return builder.build();
+        if (properties.apiKey() == null
+                || properties.apiKey().isBlank()
+                || "desabilitado".equalsIgnoreCase(properties.apiKey())) {
+            throw new IllegalStateException(
+                    "RELAYOS_API_KEY não configurada (valor atual rejeitado por motivo de segurança)");
+        }
     }
 }

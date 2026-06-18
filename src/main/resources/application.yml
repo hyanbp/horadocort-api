@@ -40,13 +40,12 @@ app:
     reminder-window-minutes: 60
 
 relayos:
-  base-url: https://api.relayos.com.br
-  api-key: desabilitado
+  base-url: ${RELAYOS_BASE_URL:https://api.relayos.com.br}
+  api-key: ${RELAYOS_API_KEY}
   templates:
     booking-confirmed: booking_confirmed
     booking-reminder: booking_reminder
     barber-notification: barber_new_booking
-
 logging:
   level:
     com.horadocort: DEBUG
