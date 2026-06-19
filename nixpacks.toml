@@ -1,0 +1,2 @@
+echo '[phases.build]' > nixpacks.toml
+   echo 'cmds = ["./gradlew bootJar --no-daemon --rerun-tasks"]' >> nixpacks.toml
