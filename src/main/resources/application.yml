@@ -41,7 +41,7 @@ app:
 
 relayos:
   base-url: https://api.relayos.com.br
-  api-key: ${RELAYOS_API_KEY}
+  api-key: rly_live_7gRfkjNwAi09EfJDbWjoCoW4Y6rnXoiK
   templates:
     booking-confirmed: booking_confirmed
     booking-reminder: booking_reminder
