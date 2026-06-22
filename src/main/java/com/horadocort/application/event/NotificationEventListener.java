@@ -9,9 +9,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -40,39 +42,55 @@ public class NotificationEventListener {
 
         Map<String, String> variables = buildVariables(event);
 
-        log.info("Disparando template {} para tenant {}", templateName, event.tenantName());
-        relayOsClient.sendMessage(to, templateName, variables);
+        log.info("Disparando template {} para tenant {} (to={})", templateName, event.tenantName(), to);
+
+        try {
+            relayOsClient.sendMessage(to, templateName, variables);
+        } catch (IllegalArgumentException e) {
+            log.warn("Notificação ignorada — template={}, to={}, motivo={}", templateName, to, e.getMessage());
+        } catch (Exception e) {
+            log.error("Falha inesperada ao notificar — template={}, to={}", templateName, to, e);
+        }
     }
 
     private Map<String, String> buildVariables(BookingNotificationEvent event) {
         Map<String, String> vars = new LinkedHashMap<>();
         String date = event.booking().getStartAt().format(DATE_FMT);
         String time = event.booking().getStartAt().format(TIME_FMT);
+        String customer = capitalize(event.booking().getCustomerName());
+        String tenant = capitalize(event.tenantName());
+        String barber = capitalize(event.barberName());
+        String service = capitalize(event.serviceName());
 
         switch (event.type()) {
             case CUSTOMER_CONFIRMATION -> {
-                vars.put("1", event.booking().getCustomerName());
-                vars.put("2", event.tenantName());
+                vars.put("1", customer);
+                vars.put("2", tenant);
                 vars.put("3", date);
                 vars.put("4", time);
-                vars.put("5", event.barberName());
-                vars.put("6", event.serviceName());
+                vars.put("5", barber);
+                vars.put("6", service);
             }
             case CUSTOMER_REMINDER -> {
-                // booking_reminder: {{1}} cliente, {{2}} barbearia, {{3}} hora
-                vars.put("1", event.booking().getCustomerName());
-                vars.put("2", event.tenantName());
+                vars.put("1", customer);
+                vars.put("2", tenant);
                 vars.put("3", time);
             }
             case BARBER_NEW_BOOKING -> {
-                // barber_new_booking: {{1}} barbeiro, {{2}} cliente, {{3}} serviço, {{4}} data, {{5}} hora
-                vars.put("1", event.barberName());
-                vars.put("2", event.booking().getCustomerName());
-                vars.put("3", event.serviceName());
+                vars.put("1", barber);
+                vars.put("2", customer);
+                vars.put("3", service);
                 vars.put("4", date);
                 vars.put("5", time);
             }
         }
         return vars;
+    }
+
+    private String capitalize(String s) {
+        if (s == null || s.isBlank()) return s;
+        return Arrays.stream(s.trim().split("\\s+"))
+                .map(w -> Character.toUpperCase(w.charAt(0)) + w.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
     }
 }
