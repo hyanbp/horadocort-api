@@ -51,13 +51,12 @@ public class NotificationEventListener {
 
         switch (event.type()) {
             case CUSTOMER_CONFIRMATION -> {
-                // booking_confirmed: {{1}} cliente, {{2}} barbearia, {{3}} barbeiro, {{4}} serviço, {{5}} data, {{6}} hora
                 vars.put("1", event.booking().getCustomerName());
                 vars.put("2", event.tenantName());
-                vars.put("3", event.barberName());
-                vars.put("4", event.serviceName());
-                vars.put("5", date);
-                vars.put("6", time);
+                vars.put("3", date);
+                vars.put("4", time);
+                vars.put("5", event.barberName());
+                vars.put("6", event.serviceName());
             }
             case CUSTOMER_REMINDER -> {
                 // booking_reminder: {{1}} cliente, {{2}} barbearia, {{3}} hora
